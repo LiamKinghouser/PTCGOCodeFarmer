@@ -18,13 +18,13 @@ public class OCRUtils {
         try {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(file);
             Java2DFrameConverter converter = new Java2DFrameConverter();
-            checkImages(grabber, converter);
+            checkImages(file, grabber, converter);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void checkImages(FFmpegFrameGrabber grabber, Java2DFrameConverter converter) {
+    public static void checkImages(File file, FFmpegFrameGrabber grabber, Java2DFrameConverter converter) {
         try {
             ArrayList<String> results = new ArrayList<>();
 
@@ -40,9 +40,9 @@ public class OCRUtils {
             BinaryBitmap bitmap = null;
             Result r = null;
 
-            System.out.println("Video length: " + grabber.getLengthInTime() + " seconds");
+            System.out.println("Video length: " + Utils.getLength(totalFrames / 30));
             System.out.println("Starting scan for " + totalFrames + " frames...");
-            double startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             for (int i = 1; i <= totalFrames; i++) {
                 Frame frame = grabber.grabImage();
                 BufferedImage bi = converter.convert(frame);
@@ -57,11 +57,12 @@ public class OCRUtils {
             }
             grabber.stop();
             System.out.println();
-            System.out.println("Done. Time elapsed: " + ((System.currentTimeMillis() - startTime) / 1000));
+            System.out.println("Frames scanned. Time elapsed: " + ((System.currentTimeMillis() - startTime) / 1000));
             System.out.println("Found " + results.size() + " QR Codes:");
             for (String result : results) {
                 System.out.println(result);
             }
+            //file.delete();
         }
         catch (Exception e) {
             e.printStackTrace();

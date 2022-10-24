@@ -1,32 +1,20 @@
 package kinghouser.util;
 
-import com.github.kiulian.downloader.YoutubeDownloader;
-import com.github.kiulian.downloader.downloader.YoutubeCallback;
-import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload;
-import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
-import com.github.kiulian.downloader.downloader.response.Response;
-import com.github.kiulian.downloader.model.videos.VideoInfo;
-import com.github.kiulian.downloader.model.videos.formats.Format;
-import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
-import kinghouser.PTCGOCodeFarmer;
-
 import java.io.File;
-import java.net.URL;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class Utils {
 
-    public static final String ENTER_CODES_URL = "https://www.pokemon.com/us/pokemon-trainer-club/enter-codes";
     public static final int LOWER_FPS_THRESHOLD_SECONDS = 300;
 
-    private static final YoutubeDownloader youtubeDownloader = new YoutubeDownloader();
+    public static File tempDirectory = new File(System.getProperty("java.io.tmpdir"));
 
     public static void init() {
         handleLoggers();
         try {
-            OCRUtils.checkVideo(new File(PTCGOCodeFarmer.class.getClassLoader().getResource("vid2.mp4").toURI()));
-            //OCRUtils.checkVideo(new File(downloadYouTubeVideo("https://www.youtube.com/watch?v=mDgn1UDw6Io").toURI()));
+            //OCRUtils.checkVideo(new File(PTCGOCodeFarmer.class.getClassLoader().getResource("vid2.mp4").toURI()));
+            OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo("https://www.youtube.com/watch?v=C0YnCEd8q8s"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -48,19 +36,20 @@ public class Utils {
         return s.split("-").length == 4;
     }
 
-    /*
-    private static File downloadYouTubeVideo(String url) {
-        String videoId = url.split("www.youtube.com/watch?v=")[1];
-
-
-        File outputDir = new File(System.getProperty("java. io. tmpdir"));
-
-        RequestVideoFileDownload requestVideoFileDownload = new RequestVideoFileDownload(videoFormats.get(0))
-                .saveTo(outputDir)
-                .renameTo("youtube-video-" + System.currentTimeMillis(), ".mp4")
-                .overwriteIfExists(true);
-        response = youtubeDownloader.downloadVideoFile(requestVideoFileDownload);
+    public static String getVideoID(String url) {
+        StringBuilder id = new StringBuilder();
+        for (int i = url.length() - 1; i > 0; i--) {
+            if (Character.isLetterOrDigit(url.charAt(i)) || url.charAt(i) == '_' || url.charAt(i) == '-') id.append(url.charAt(i));
+            else break;
+        }
+        return id.reverse().toString();
     }
 
-     */
+    public static String getLength(int seconds) {
+        int sec = seconds % 60;
+        int min = (seconds / 60) % 60;
+        int hours = (seconds / 60) / 60;
+
+        return hours + ":" + min + ":" + sec;
+    }
 }
