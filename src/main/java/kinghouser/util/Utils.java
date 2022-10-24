@@ -6,8 +6,6 @@ import java.util.logging.Logger;
 
 public class Utils {
 
-    public static final int LOWER_FPS_THRESHOLD_SECONDS = 300;
-
     public static File tempDirectory = new File(System.getProperty("java.io.tmpdir"));
 
     public static void init() {
@@ -45,11 +43,11 @@ public class Utils {
         return id.reverse().toString();
     }
 
-    public static String getLength(int seconds) {
+    public static String getTime(int seconds) {
         int sec = seconds % 60;
         int min = (seconds / 60) % 60;
         int hours = (seconds / 60) / 60;
 
-        return hours + ":" + min + ":" + sec;
+        return (String.valueOf(hours).length() > 1 ? hours : ("0" + hours)) + ":" + (String.valueOf(min).length() > 1 ? min : ("0" + min) + ":" + (String.valueOf(sec).length() > 1 ? sec : ("0" + sec)));
     }
 }

@@ -40,29 +40,33 @@ public class OCRUtils {
             BinaryBitmap bitmap = null;
             Result r = null;
 
-            System.out.println("Video length: " + Utils.getLength(totalFrames / 30));
             System.out.println("Starting scan for " + totalFrames + " frames...");
             long startTime = System.currentTimeMillis();
             for (int i = 1; i <= totalFrames; i++) {
                 Frame frame = grabber.grabImage();
                 BufferedImage bi = converter.convert(frame);
-                if (bi == null) continue;
+                if (bi == null) {
+                    continue;
+                }
 
                 String result = decodeQRCode(bi, multiFormatReader, luminanceSource, bitmap, r);
 
                 if (result != null && !result.isBlank() && !results.contains(result) && Utils.isPTCGOCode(result)) results.add(result);
 
                 System.out.print("\r");
-                System.out.print("[ " + (int)(((float)i / (float)totalFrames) * 100) + "% ] [ " + i + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(i, System.currentTimeMillis() - startTime) + " fps ] [ " + ((System.currentTimeMillis() - startTime) / 1000) + " ]");
+                System.out.print("[ " + (int)(((float)i / (float)totalFrames) * 100) + "% ] [ " + i + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(i, System.currentTimeMillis() - startTime) + " fps ] [ " + Utils.getTime((int) ((System.currentTimeMillis() - startTime) / 1000)) + " ]");
             }
             grabber.stop();
+            System.out.print("\r");
+            System.out.print("[ 100% ] [ " + totalFrames + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(totalFrames, System.currentTimeMillis() - startTime) + " fps ]");
+
             System.out.println();
-            System.out.println("Frames scanned. Time elapsed: " + ((System.currentTimeMillis() - startTime) / 1000));
+            System.out.println("Frames scanned. Time elapsed: " + Utils.getTime((int)(System.currentTimeMillis() - startTime) / 1000));
             System.out.println("Found " + results.size() + " QR Codes:");
             for (String result : results) {
                 System.out.println(result);
             }
-            //file.delete();
+            file.delete();
         }
         catch (Exception e) {
             e.printStackTrace();

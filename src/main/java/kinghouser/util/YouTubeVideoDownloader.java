@@ -48,8 +48,8 @@ public class YouTubeVideoDownloader {
                 .overwriteIfExists(false);
         Response<File> fileResponse = downloader.downloadVideoFile(requestVideoFileDownload);
         File data = fileResponse.data();
-        //data.deleteOnExit();
-        System.out.println("Video downloaded. Time elapsed: " + ((System.currentTimeMillis() - startTime) / 1000));
+        data.deleteOnExit();
+        System.out.println("Video downloaded. Time elapsed: " + (Utils.getTime((int)(System.currentTimeMillis() - startTime) / 1000)));
         return data;
     }
 }
