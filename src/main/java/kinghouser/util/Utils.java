@@ -1,7 +1,10 @@
 package kinghouser.util;
 
+import com.github.kiulian.downloader.YoutubeDownloader;
+import kinghouser.util.youtube.YouTubeVideoDownloader;
+
 import java.io.File;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Utils {
@@ -9,20 +12,13 @@ public class Utils {
     public static File tempDirectory = new File(System.getProperty("java.io.tmpdir"));
 
     public static void init() {
-        handleLoggers();
         try {
-            //OCRUtils.checkVideo(new File(PTCGOCodeFarmer.class.getClassLoader().getResource("vid2.mp4").toURI()));
-            OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo("https://www.youtube.com/watch?v=C0YnCEd8q8s"));
+            OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo("https://www.youtube.com/watch?v=CU2FU_wSX5g"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
        // PTCGOUtils.applyPTCGOCode("");
-    }
-
-    private static void handleLoggers() {
-        Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
-        Logger.getLogger("org.apache.http").setLevel(java.util.logging.Level.OFF);
     }
 
     public static String findAverageSpeed(double frames, double time) {

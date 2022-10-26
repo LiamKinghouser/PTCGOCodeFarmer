@@ -1,4 +1,4 @@
-package kinghouser.util;
+package kinghouser.util.youtube;
 
 import com.github.kiulian.downloader.YoutubeDownloader;
 import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload;
@@ -9,23 +9,23 @@ import com.github.kiulian.downloader.model.Filter;
 import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.Format;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
+import kinghouser.util.Utils;
 
 import java.io.File;
 import java.util.List;
 
 public class YouTubeVideoDownloader {
 
-    private static final YoutubeDownloader downloader = new YoutubeDownloader();
+    private static final YoutubeDownloader youtubeDownloader = new YoutubeDownloader();
 
     public static File downloadYouTubeVideo(String url) {
         System.out.println("Starting YouTube download for: " + url);
         long startTime = System.currentTimeMillis();
 
         String videoId = Utils.getVideoID(url);
-        System.out.println(videoId);
 
         RequestVideoInfo request = new RequestVideoInfo(videoId);
-        Response<VideoInfo> response = downloader.getVideoInfo(request);
+        Response<VideoInfo> response = youtubeDownloader.getVideoInfo(request);
         VideoInfo video = response.data();
 
         List<Format> videoFormats = video.findFormats(new Filter<>() {
@@ -46,7 +46,7 @@ public class YouTubeVideoDownloader {
                 .saveTo(outputDir)
                 .renameTo("youtube-video-" + System.currentTimeMillis())
                 .overwriteIfExists(false);
-        Response<File> fileResponse = downloader.downloadVideoFile(requestVideoFileDownload);
+        Response<File> fileResponse = youtubeDownloader.downloadVideoFile(requestVideoFileDownload);
         File data = fileResponse.data();
         data.deleteOnExit();
         System.out.println("Video downloaded. Time elapsed: " + (Utils.getTime((int)(System.currentTimeMillis() - startTime) / 1000)));

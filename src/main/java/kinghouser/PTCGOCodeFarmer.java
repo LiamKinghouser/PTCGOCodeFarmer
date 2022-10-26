@@ -1,10 +1,17 @@
 package kinghouser;
 
-import kinghouser.util.Utils;
+import kinghouser.util.youtube.YouTubeCrawler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PTCGOCodeFarmer {
 
     public static void main(String[] args) {
-        Utils.init();
+        List<String> queries = new ArrayList<>();
+        YouTubeCrawler youTubeCrawler = new YouTubeCrawler(queries);
+        youTubeCrawler.start();
+
+        //Utils.init();
     }
 }
