@@ -8,7 +8,9 @@ import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
 import com.github.kiulian.downloader.model.search.field.SortField;
 import com.github.kiulian.downloader.model.search.field.TypeField;
 import com.github.kiulian.downloader.model.search.field.UploadDateField;
+import kinghouser.util.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class YouTubeCrawler {
@@ -17,15 +19,24 @@ public class YouTubeCrawler {
 
     private final YoutubeDownloader youtubeDownloader;
 
+    private ArrayList<String> checkedVideoIDs;
+
     public YouTubeCrawler(List<String> queries) {
         this.queries = queries;
         youtubeDownloader = new YoutubeDownloader();
+        checkedVideoIDs = new ArrayList<>();
     }
 
     public void start() {
-        RequestSearchResult request = new RequestSearchResult("pokémon opening")
+        for (String query : queries) {
+            search(query);
+        }
+    }
+
+    public void search(String query) {
+        RequestSearchResult request = new RequestSearchResult(query)
                 .type(TypeField.VIDEO)
-                .uploadedThis(UploadDateField.MONTH)
+                .uploadedThis(UploadDateField.HOUR)
                 .forceExactQuery(true)
                 .sortBy(SortField.VIEW_COUNT);
 
@@ -47,15 +58,14 @@ public class YouTubeCrawler {
         System.out.println("Found " + resultsCount + " videos");
     }
 
-    private static void printResults(SearchResult result) {
+    private void printResults(SearchResult result) {
         List<SearchResultVideoDetails> videos = result.videos();
 
         for (SearchResultVideoDetails searchResultVideoDetails : videos) {
-            System.out.println(searchResultVideoDetails.badges() + " | " + searchResultVideoDetails.title() + " | " + searchResultVideoDetails.viewCount() + " | " + urlFromVideoID(searchResultVideoDetails.videoId()));
+            if (searchResultVideoDetails.viewCount() < 5 && !this.checkedVideoIDs.contains(searchResultVideoDetails.videoId())) {
+                System.out.println(searchResultVideoDetails.badges() + " | " + searchResultVideoDetails.title() + " | " + searchResultVideoDetails.viewCount() + " | " + Utils.urlFromVideoID(searchResultVideoDetails.videoId()));
+            }
+            checkedVideoIDs.add(searchResultVideoDetails.videoId());
         }
-    }
-
-    private static String urlFromVideoID(String id) {
-        return "https://youtube.com/watch?v=" + id;
     }
 }

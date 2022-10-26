@@ -46,4 +46,8 @@ public class Utils {
 
         return (String.valueOf(hours).length() > 1 ? hours : ("0" + hours)) + ":" + (String.valueOf(min).length() > 1 ? min : ("0" + min) + ":" + (String.valueOf(sec).length() > 1 ? sec : ("0" + sec)));
     }
+
+    public static String urlFromVideoID(String id) {
+        return "https://youtube.com/watch?v=" + id;
+    }
 }
