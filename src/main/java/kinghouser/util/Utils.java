@@ -1,11 +1,13 @@
 package kinghouser.util;
 
-import com.github.kiulian.downloader.YoutubeDownloader;
+import com.github.kiulian.downloader.model.search.SearchResult;
+import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
 import kinghouser.util.youtube.YouTubeVideoDownloader;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 public class Utils {
 
@@ -49,5 +51,19 @@ public class Utils {
 
     public static String urlFromVideoID(String id) {
         return "https://youtube.com/watch?v=" + id;
+    }
+
+    public static int getAllVideosCount(ArrayList<SearchResult> searchResults) {
+        int count = 0;
+        for (SearchResult searchResult : searchResults) {
+            for (SearchResultVideoDetails searchResultVideoDetails : searchResult.videos()) {
+                if (searchResultVideoDetailsFitsCriteria(searchResultVideoDetails)) count++;
+            }
+        }
+        return count;
+    }
+
+    public static boolean searchResultVideoDetailsFitsCriteria(SearchResultVideoDetails searchResultVideoDetails) {
+        return !searchResultVideoDetails.isLive() && searchResultVideoDetails.lengthSeconds() < 300 && searchResultVideoDetails.viewCount() < 50 && searchResultVideoDetails.viewCount() != -1;
     }
 }

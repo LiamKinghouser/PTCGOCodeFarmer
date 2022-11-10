@@ -51,7 +51,10 @@ public class OCRUtils {
 
                 String result = decodeQRCode(bi, multiFormatReader, luminanceSource, bitmap, r);
 
-                if (result != null && !result.isBlank() && !results.contains(result) && Utils.isPTCGOCode(result)) results.add(result);
+                if (result != null && !result.isBlank() && !results.contains(result) && Utils.isPTCGOCode(result)) {
+                    results.add(result);
+                    PTCGOUtils.applyPTCGOCode(result);
+                }
 
                 System.out.print("\r");
                 System.out.print("[ " + (int)(((float)i / (float)totalFrames) * 100) + "% ] [ " + i + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(i, System.currentTimeMillis() - startTime) + " fps ] [ " + Utils.getTime((int) ((System.currentTimeMillis() - startTime) / 1000)) + " ]");

@@ -21,6 +21,15 @@ public class PTCGOCodeFarmer {
         queries.add("pokemon cards opening");
         queries.add("pokémon cards opening");
 
+        queries.add("pokemon open");
+        queries.add("pokémon open");
+
+        queries.add("pokemon cards open");
+        queries.add("pokémon cards open");
+
+        queries.add("pokemon box open");
+        queries.add("pokémon box open");
+
         YouTubeCrawler youTubeCrawler = new YouTubeCrawler(queries);
         youTubeCrawler.start();
 
