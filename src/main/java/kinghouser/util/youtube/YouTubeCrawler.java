@@ -42,7 +42,7 @@ public class YouTubeCrawler {
             for (SearchResultVideoDetails searchResultVideoDetails : searchResult.videos()) {
                 if (!this.checkedVideoIDs.contains(searchResultVideoDetails.videoId()) && Utils.searchResultVideoDetailsFitsCriteria(searchResultVideoDetails)) {
                     System.out.println(searchResultVideoDetails.badges() + " | " + searchResultVideoDetails.title() + " | " + searchResultVideoDetails.viewCount() + " | " + Utils.urlFromVideoID(searchResultVideoDetails.videoId()));
-                    OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo(Utils.urlFromVideoID(searchResultVideoDetails.videoId())));
+                    //OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo(Utils.urlFromVideoID(searchResultVideoDetails.videoId())));
                 }
                 checkedVideoIDs.add(searchResultVideoDetails.videoId());
             }
