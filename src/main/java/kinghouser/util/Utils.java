@@ -1,11 +1,8 @@
 package kinghouser.util;
 
-import com.github.kiulian.downloader.model.search.SearchResult;
 import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
-import kinghouser.util.youtube.YouTubeVideoDownloader;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class Utils {
 
