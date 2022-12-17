@@ -32,7 +32,5 @@ public class PTCGOCodeFarmer {
 
         YouTubeCrawler youTubeCrawler = new YouTubeCrawler(queries);
         youTubeCrawler.start();
-
-        //Utils.init();
     }
 }

@@ -3,9 +3,9 @@ package kinghouser.util;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import kinghouser.util.ptcgo.PTCGOUtils;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
 import java.awt.image.BufferedImage;
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class OCRUtils {
 
     public static void checkVideo(File file) {
+        if (file == null) return;
         try {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(file);
             Java2DFrameConverter converter = new Java2DFrameConverter();

@@ -24,6 +24,8 @@ public class YouTubeCrawler {
 
     private final ArrayList<SearchResult> searchResults;
 
+    private ArrayList<YouTubeVideoScanner> runningYouTubeVideoScanners = new ArrayList<>();
+
     public YouTubeCrawler(List<String> queries) {
         this.queries = queries;
         youtubeDownloader = new YoutubeDownloader();
@@ -36,15 +38,26 @@ public class YouTubeCrawler {
             search(query);
         }
 
-        System.out.println("Found " + Utils.getAllVideosCount(searchResults) + " videos. Scanning now.");
+        ArrayList<String> videoIDs = new ArrayList<>();
+
+        for (SearchResult searchResult : searchResults) {
+            for (SearchResultVideoDetails searchResultVideoDetails : searchResult.videos()) {
+                if (!videoIDs.contains(searchResultVideoDetails.videoId()) && Utils.searchResultVideoDetailsFitsCriteria(searchResultVideoDetails)) {
+                    videoIDs.add(searchResultVideoDetails.videoId());
+                }
+            }
+        }
+
+        System.out.println("Found " + videoIDs.size() + " videos. Scanning now.");
 
         for (SearchResult searchResult : searchResults) {
             for (SearchResultVideoDetails searchResultVideoDetails : searchResult.videos()) {
                 if (!this.checkedVideoIDs.contains(searchResultVideoDetails.videoId()) && Utils.searchResultVideoDetailsFitsCriteria(searchResultVideoDetails)) {
+                    // YouTubeVideoScanner youTubeVideoScanner = new YouTubeVideoScanner(searchResultVideoDetails);
                     System.out.println(searchResultVideoDetails.badges() + " | " + searchResultVideoDetails.title() + " | " + searchResultVideoDetails.viewCount() + " | " + Utils.urlFromVideoID(searchResultVideoDetails.videoId()));
-                    //OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo(Utils.urlFromVideoID(searchResultVideoDetails.videoId())));
+                    OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo(Utils.urlFromVideoID(searchResultVideoDetails.videoId())));
+                    checkedVideoIDs.add(searchResultVideoDetails.videoId());
                 }
-                checkedVideoIDs.add(searchResultVideoDetails.videoId());
             }
         }
     }
@@ -60,10 +73,10 @@ public class YouTubeCrawler {
 
         searchResults.add(searchResult);
 
-        while (searchResult.hasContinuation()) {
+        while (searchResult != null && searchResult.hasContinuation()) {
             RequestSearchContinuation nextRequest = new RequestSearchContinuation(searchResult);
             searchResult = youtubeDownloader.searchContinuation(nextRequest).data();
-            searchResults.add(searchResult);
+            if (searchResult != null) searchResults.add(searchResult);
         }
     }
 }

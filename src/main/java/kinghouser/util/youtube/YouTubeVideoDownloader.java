@@ -28,6 +28,8 @@ public class YouTubeVideoDownloader {
         Response<VideoInfo> response = youtubeDownloader.getVideoInfo(request);
         VideoInfo video = response.data();
 
+        if (video == null) return null;
+
         List<Format> videoFormats = video.findFormats(new Filter<>() {
             @Override
             public boolean test(Format format) {

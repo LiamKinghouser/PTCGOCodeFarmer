@@ -4,24 +4,12 @@ import com.github.kiulian.downloader.model.search.SearchResult;
 import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
 import kinghouser.util.youtube.YouTubeVideoDownloader;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 
 public class Utils {
 
     public static File tempDirectory = new File(System.getProperty("java.io.tmpdir"));
-
-    public static void init() {
-        try {
-            OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo("https://www.youtube.com/watch?v=CU2FU_wSX5g"));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-       // PTCGOUtils.applyPTCGOCode("");
-    }
 
     public static String findAverageSpeed(double frames, double time) {
         return String.format("%.2f", (frames / (time / 1000)));
@@ -53,17 +41,7 @@ public class Utils {
         return "https://youtube.com/watch?v=" + id;
     }
 
-    public static int getAllVideosCount(ArrayList<SearchResult> searchResults) {
-        int count = 0;
-        for (SearchResult searchResult : searchResults) {
-            for (SearchResultVideoDetails searchResultVideoDetails : searchResult.videos()) {
-                if (searchResultVideoDetailsFitsCriteria(searchResultVideoDetails)) count++;
-            }
-        }
-        return count;
-    }
-
     public static boolean searchResultVideoDetailsFitsCriteria(SearchResultVideoDetails searchResultVideoDetails) {
-        return !searchResultVideoDetails.isLive() && searchResultVideoDetails.lengthSeconds() < 300 && searchResultVideoDetails.viewCount() < 50 && searchResultVideoDetails.viewCount() != -1;
+        return !searchResultVideoDetails.isLive() && searchResultVideoDetails.lengthSeconds() < 300 && searchResultVideoDetails.viewCount() <= 5 && searchResultVideoDetails.viewCount() != -1;
     }
 }
