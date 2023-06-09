@@ -1,23 +1,33 @@
 package kinghouser.util.youtube;
 
 import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
+import kinghouser.PTCGOCodeFarmer;
 import kinghouser.util.OCRUtils;
 import kinghouser.util.Utils;
 
+import java.io.File;
+
 public class YouTubeVideoScanner extends Thread {
 
-    private SearchResultVideoDetails searchResultVideoDetails;
+    private final SearchResultVideoDetails searchResultVideoDetails;
 
     public YouTubeVideoScanner(SearchResultVideoDetails searchResultVideoDetails) {
         this.searchResultVideoDetails = searchResultVideoDetails;
-        this.start();
     }
 
     public void run() {
-        scan(searchResultVideoDetails);
+        // OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo(Utils.urlFromVideoID(searchResultVideoDetails.videoId())));
+        File video = YouTubeVideoDownloader.download(Utils.urlFromVideoID(searchResultVideoDetails.videoId()));
+        if (video != null) {
+            System.out.println("Checking video...");
+            boolean successful = OCRUtils.checkVideo(video);
+            if (!successful) System.out.println("Failed to scan video. ");
+            else System.out.println("Successfully scanned video.");
+        }
+        endThread();
     }
 
-    public void scan(SearchResultVideoDetails searchResultVideoDetails) {
-        OCRUtils.checkVideo(YouTubeVideoDownloader.downloadYouTubeVideo(Utils.urlFromVideoID(searchResultVideoDetails.videoId())));
+    private void endThread() {
+        PTCGOCodeFarmer.youTubeCrawler.removeFromRunningYouTubeVideoScanners(this.threadId());
     }
 }

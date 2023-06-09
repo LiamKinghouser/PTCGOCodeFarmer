@@ -1,11 +1,18 @@
 package kinghouser;
 
+import kinghouser.util.Utils;
 import kinghouser.util.youtube.YouTubeCrawler;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PTCGOCodeFarmer {
+
+    public static Utils.GUIThread guiThread;
+    public static YouTubeCrawler youTubeCrawler;
+
+    public static JLabel jLabel;
 
     public static void main(String[] args) {
         List<String> queries = new ArrayList<>();
@@ -30,7 +37,10 @@ public class PTCGOCodeFarmer {
         queries.add("pokemon box open");
         queries.add("pokémon box open");
 
-        YouTubeCrawler youTubeCrawler = new YouTubeCrawler(queries);
-        youTubeCrawler.start();
+        guiThread = new Utils.GUIThread();
+        guiThread.start();
+
+        youTubeCrawler = new YouTubeCrawler(queries);
+        //youTubeCrawler.start();
     }
 }

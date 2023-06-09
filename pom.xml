@@ -20,6 +20,18 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>19</source>
+                    <target>19</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <!--Dependencies for getting frames from video-->
@@ -52,11 +64,24 @@
             <version>3.3.0</version>
         </dependency>
 
-        <!--Dependency for download YouTube videos-->
+        <!--Dependencies for searching for and downloading YouTube videos-->
         <dependency>
             <groupId>com.github.sealedtx</groupId>
             <artifactId>java-youtube-downloader</artifactId>
             <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.gaeqs</groupId>
+            <artifactId>JavaYoutubeDownloader</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <!--Dependency for detecting an image in another image-->
+        <dependency>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.6.0-0</version>
         </dependency>
     </dependencies>
 

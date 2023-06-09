@@ -3,7 +3,6 @@ package kinghouser.util;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
-import kinghouser.util.ptcgo.PTCGOUtils;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -14,32 +13,25 @@ import java.util.ArrayList;
 
 public class OCRUtils {
 
-    public static void checkVideo(File file) {
-        if (file == null) return;
+    public static boolean checkVideo(File file) {
+        if (file == null) return false;
         try {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(file);
             Java2DFrameConverter converter = new Java2DFrameConverter();
-            checkImages(file, grabber, converter);
+            return checkImages(file, grabber, converter);
         } catch (Exception e) {
-            e.printStackTrace();
+            return false;
         }
     }
 
-    public static void checkImages(File file, FFmpegFrameGrabber grabber, Java2DFrameConverter converter) {
+    private static boolean checkImages(File file, FFmpegFrameGrabber grabber, Java2DFrameConverter converter) {
         try {
             ArrayList<String> results = new ArrayList<>();
 
             grabber.start();
             int totalFrames = grabber.getLengthInFrames();
 
-            // reusing variables to increase speed
-            // not 100% sure if working but time was reduced by 17 seconds in a test case (44 fps -> 46 fps)
-            // (versus creating new vars each time image checked)
-
             MultiFormatReader multiFormatReader = new MultiFormatReader();
-            LuminanceSource luminanceSource = null;
-            BinaryBitmap bitmap = null;
-            Result r = null;
 
             System.out.println("Starting scan for " + totalFrames + " frames...");
             long startTime = System.currentTimeMillis();
@@ -50,30 +42,32 @@ public class OCRUtils {
                     continue;
                 }
 
-                String result = decodeQRCode(bi, multiFormatReader, luminanceSource, bitmap, r);
+                String result = decodeQRCode(bi, multiFormatReader, null, null, null);
 
                 if (result != null && !result.isBlank() && !results.contains(result) && Utils.isPTCGOCode(result)) {
                     results.add(result);
-                    PTCGOUtils.applyPTCGOCode(result);
+                    // PTCGOCodeFarmer.youTubeCrawler.ptcgoCodeRedeemer.ptcgoCodeQueue.add(result);
+                    System.out.println(result);
                 }
 
-                System.out.print("\r");
-                System.out.print("[ " + (int)(((float)i / (float)totalFrames) * 100) + "% ] [ " + i + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(i, System.currentTimeMillis() - startTime) + " fps ] [ " + Utils.getTime((int) ((System.currentTimeMillis() - startTime) / 1000)) + " ]");
+                // System.out.print("\r");
+                // System.out.print("[ " + (int)(((float)i / (float)totalFrames) * 100) + "% ] [ " + i + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(i, System.currentTimeMillis() - startTime) + " fps ] [ " + Utils.getTime((int) ((System.currentTimeMillis() - startTime) / 1000)) + " ]");
             }
             grabber.stop();
-            System.out.print("\r");
-            System.out.print("[ 100% ] [ " + totalFrames + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(totalFrames, System.currentTimeMillis() - startTime) + " fps ]");
+            // System.out.print("\r");
+            // System.out.print("[ 100% ] [ " + totalFrames + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(totalFrames, System.currentTimeMillis() - startTime) + " fps ]");
 
-            System.out.println();
-            System.out.println("Frames scanned. Time elapsed: " + Utils.getTime((int)(System.currentTimeMillis() - startTime) / 1000));
-            System.out.println("Found " + results.size() + " QR Codes:");
+            // System.out.println();
+            // System.out.println("Frames scanned. Time elapsed: " + Utils.getTime((int)(System.currentTimeMillis() - startTime) / 1000));
+            // System.out.println("Found " + results.size() + " QR Codes:");
             for (String result : results) {
-                System.out.println(result);
+                // System.out.println(result);
             }
             file.delete();
+            return true;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            return false;
         }
     }
 
