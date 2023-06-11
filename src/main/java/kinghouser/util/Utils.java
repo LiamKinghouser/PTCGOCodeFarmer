@@ -1,12 +1,17 @@
 package kinghouser.util;
 
 import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
+import kinghouser.PTCGOCodeFarmer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Utils {
 
@@ -50,23 +55,34 @@ public class Utils {
         return !searchResultVideoDetails.isLive() && searchResultVideoDetails.lengthSeconds() <= Utils.MAX_VIDEO_LENGTH_SECONDS && searchResultVideoDetails.viewCount() <= Utils.MAX_VIDEO_VIEW_COUNT && searchResultVideoDetails.viewCount() != -1;
     }
 
+    public static void loadNativeLibrary() {
+        Path jarPath;
+        try {
+            jarPath = Paths.get(PTCGOCodeFarmer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        String path = jarPath.getParent().toString() + File.separator + "lib" + File.separator + "libopencv_java460.dylib";
+        System.load(path);
+    }
+
     public static class GUIThread extends Thread {
 
-        private static JLabel[] threadSnapshots = new JLabel[5];
+        private static final JLabel[] threadSnapshots = new JLabel[Utils.MAX_THREADS];
 
         public void run() {
             JFrame frame = new JFrame();
-            frame.setSize(800, 400);
+            frame.setSize(1200, 600);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLocationRelativeTo(null);
+            frame.setResizable(false);
 
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setTitle("PTCGO Code Farmer");
 
             // Create main panel with a grid layout
-            JPanel mainPanel = new JPanel(new GridLayout(1, 5));
-            mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-            frame.add(mainPanel);
+            JPanel mainPanel = new JPanel(new GridLayout(1, Utils.MAX_THREADS));
+            frame.add(mainPanel, BorderLayout.NORTH);
 
             // Load sample images
             BufferedImage[] images = loadSampleImages();
@@ -74,6 +90,7 @@ public class Utils {
             // Create and add image labels to the main panel
             for (BufferedImage image : images) {
                 JLabel threadSnapshot = new JLabel(new ImageIcon(image));
+                threadSnapshot.setBorder(new EmptyBorder(0, 10, 0, 10));
                 threadSnapshot.setHorizontalAlignment(SwingConstants.CENTER);
                 mainPanel.add(threadSnapshot);
                 int index = getFirstEmptyIndex();
@@ -81,14 +98,12 @@ public class Utils {
             }
 
             // Adjust frame size based on content
-            frame.pack();
-            frame.setLocationRelativeTo(null);
 
             frame.setVisible(true);
         }
 
         private BufferedImage[] loadSampleImages() {
-            BufferedImage[] images = new BufferedImage[5];
+            BufferedImage[] images = new BufferedImage[Utils.MAX_THREADS];
 
             int width = 200;
             int height = 200;
@@ -99,16 +114,35 @@ public class Utils {
                 g2d.fillRect(0, 0, width, height);
                 g2d.dispose();
             }
-
             return images;
         }
 
-        private void updateImage(int index, BufferedImage image) {
+        public void updateImage(int index, BufferedImage image) {
             threadSnapshots[index].setIcon(new ImageIcon(image));
         }
 
+        public void resetImage(int index) {
+            BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, 200, 200);
+            g2d.dispose();
+            threadSnapshots[index].setIcon(new ImageIcon(bufferedImage));
+        }
+
+        public void setDownloadingVideo(int index) {
+            BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, 200, 200);
+            g2d.setColor(Color.WHITE);
+            g2d.drawString("Downloading...", 50, 100);
+            g2d.dispose();
+            threadSnapshots[index].setIcon(new ImageIcon(bufferedImage));
+        }
+
         private int getFirstEmptyIndex() {
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < Utils.MAX_THREADS; i++) {
                 if (threadSnapshots[i] == null) return i;
             }
             return -1;

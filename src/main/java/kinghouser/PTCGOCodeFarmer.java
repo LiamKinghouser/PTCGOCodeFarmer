@@ -1,20 +1,21 @@
 package kinghouser;
 
 import kinghouser.util.Utils;
+import kinghouser.util.ptcgo.PTCGOCodeRedeemer;
 import kinghouser.util.youtube.YouTubeCrawler;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PTCGOCodeFarmer {
 
     public static Utils.GUIThread guiThread;
+    public static PTCGOCodeRedeemer ptcgoCodeRedeemer;
     public static YouTubeCrawler youTubeCrawler;
 
-    public static JLabel jLabel;
-
     public static void main(String[] args) {
+        Utils.loadNativeLibrary();
+
         List<String> queries = new ArrayList<>();
         queries.add("pokemon opening");
         queries.add("pokémon opening");
@@ -38,9 +39,13 @@ public class PTCGOCodeFarmer {
         queries.add("pokémon box open");
 
         guiThread = new Utils.GUIThread();
-        guiThread.start();
+        // guiThread.start();
+
+        ptcgoCodeRedeemer = new PTCGOCodeRedeemer();
+        ptcgoCodeRedeemer.start();
+        ptcgoCodeRedeemer.addCodeToQueue("AB1-90H1-N1KN-L1BC");
 
         youTubeCrawler = new YouTubeCrawler(queries);
-        //youTubeCrawler.start();
+        // youTubeCrawler.start();
     }
 }

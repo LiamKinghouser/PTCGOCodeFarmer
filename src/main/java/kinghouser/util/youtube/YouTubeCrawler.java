@@ -10,7 +10,6 @@ import com.github.kiulian.downloader.model.search.field.TypeField;
 import com.github.kiulian.downloader.model.search.field.UploadDateField;
 import kinghouser.PTCGOCodeFarmer;
 import kinghouser.util.Utils;
-import kinghouser.util.ptcgo.PTCGOCodeRedeemer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,9 +21,7 @@ public class YouTubeCrawler {
     private final YoutubeDownloader youtubeDownloader;
     public final ArrayList<String> checkedVideoIDs;
     private final ArrayList<SearchResult> searchResults;
-    public ArrayList<Long> runningYouTubeVideoScanners = new ArrayList<>();
-
-    public PTCGOCodeRedeemer ptcgoCodeRedeemer;
+    public Long[] runningYouTubeVideoScanners = new Long[Utils.MAX_THREADS];
 
     public YouTubeCrawler(List<String> queries) {
         this.queries = queries;
@@ -34,16 +31,13 @@ public class YouTubeCrawler {
     }
 
     public void start() {
-        ptcgoCodeRedeemer = new PTCGOCodeRedeemer();
-        ptcgoCodeRedeemer.start();
-
         for (String query : queries) {
             search(query);
         }
 
         ArrayList<String> videoIDs = new ArrayList<>();
 
-        a: for (SearchResult searchResult : searchResults) {
+        for (SearchResult searchResult : searchResults) {
             for (SearchResultVideoDetails searchResultVideoDetails : searchResult.videos()) {
                 if (!videoIDs.contains(searchResultVideoDetails.videoId()) && Utils.searchResultVideoDetailsFitsCriteria(searchResultVideoDetails)) {
                     videoIDs.add(searchResultVideoDetails.videoId());
@@ -60,7 +54,6 @@ public class YouTubeCrawler {
 
         for (SearchResultVideoDetails searchResultVideoDetails : videos) {
             PTCGOCodeFarmer.youTubeCrawler.checkedVideoIDs.add(searchResultVideoDetails.videoId());
-            System.out.println(this.getRunningYouTubeVideoScannersCount());
             while (this.getRunningYouTubeVideoScannersCount() >= Utils.MAX_THREADS) {}
 
             YouTubeVideoScanner youTubeVideoScanner = new YouTubeVideoScanner(searchResultVideoDetails);
@@ -111,14 +104,32 @@ public class YouTubeCrawler {
     }
 
     public synchronized void removeFromRunningYouTubeVideoScanners(long threadID) {
-        runningYouTubeVideoScanners.remove(threadID);
+        for (int i = 0; i < Utils.MAX_THREADS; i++) {
+            if (runningYouTubeVideoScanners[i].equals(threadID)) runningYouTubeVideoScanners[i] = null;
+        }
     }
 
     public synchronized void addToRunningYouTubeVideoScanners(long threadID) {
-        runningYouTubeVideoScanners.add(threadID);
+        for (int i = 0; i < Utils.MAX_THREADS; i++) {
+            if (runningYouTubeVideoScanners[i] == null) {
+                runningYouTubeVideoScanners[i] = threadID;
+                break;
+            }
+        }
     }
 
     public synchronized int getRunningYouTubeVideoScannersCount() {
-        return runningYouTubeVideoScanners.size();
+        int count = 0;
+        for (int i = 0; i < Utils.MAX_THREADS; i++) {
+            if (runningYouTubeVideoScanners[i] != null) count++;
+        }
+        return count;
+    }
+
+    public synchronized int getIndex(long threadID) {
+        for (int i = 0; i < Utils.MAX_THREADS; i++) {
+            if (runningYouTubeVideoScanners[i].equals(threadID)) return i;
+        }
+        return -1;
     }
 }
