@@ -39,13 +39,12 @@ public class PTCGOCodeFarmer {
         queries.add("pokémon box open");
 
         guiThread = new Utils.GUIThread();
-        // guiThread.start();
+        guiThread.start();
 
         ptcgoCodeRedeemer = new PTCGOCodeRedeemer();
         ptcgoCodeRedeemer.start();
-        ptcgoCodeRedeemer.addCodeToQueue("AB1-90H1-N1KN-L1BC");
 
         youTubeCrawler = new YouTubeCrawler(queries);
-        // youTubeCrawler.start();
+        youTubeCrawler.start();
     }
 }

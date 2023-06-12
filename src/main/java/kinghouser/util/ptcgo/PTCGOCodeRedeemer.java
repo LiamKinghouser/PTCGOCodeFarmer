@@ -2,7 +2,6 @@ package kinghouser.util.ptcgo;
 
 import kinghouser.PTCGOCodeFarmer;
 import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
@@ -10,10 +9,6 @@ import java.awt.Point;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBufferByte;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,23 +53,27 @@ public class PTCGOCodeRedeemer extends Thread {
         try {
             focusPTCGLive();
 
-            robot.delay(200);
+            robot.delay(1000);
 
-            clickElement("images/enter_code_box.png");
+            clickUIElement("images/enter_code_box.png");
 
-            robot.delay(200);
+            robot.delay(100);
 
             typeCode(code);
 
+            robot.delay(200);
+
+            clickUIElement("images/submit_code_button.png");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void focusPTCGLive() {
-        String applescriptCommand =  "tell application \"System Events\"\n" +
-                "set frontmost of process \"Pokemon TCG Live\" to true\n" +
-                "end tell";
+        String applescriptCommand = """
+                tell application "System Events"
+                set frontmost of process "Pokemon TCG Live" to true
+                end tell""";
 
         String[] args = { "osascript", "-e", applescriptCommand };
         try {
@@ -84,13 +83,12 @@ public class PTCGOCodeRedeemer extends Thread {
         }
     }
 
-    private void clickElement(String path) {
+    private void clickUIElement(String path) {
         try {
             Point point = null;
             while (point == null) {
                 point = findUIElement(path);
             }
-            System.out.println(point.x + ", " + point.y);
 
             robot.mouseMove(point.x, point.y);
 
@@ -103,7 +101,6 @@ public class PTCGOCodeRedeemer extends Thread {
     }
 
     private Point findUIElement(String path) {
-        System.out.println("Checking for code box...");
         try {
             BufferedImage screenshot = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
 
@@ -118,41 +115,38 @@ public class PTCGOCodeRedeemer extends Thread {
 
             Mat result = new Mat();
 
+            // Resize the target mat to account for scaling differences between robot.createScreenCapture() and manual screenshot
+            targetImage = resizeMat(targetImage);
+
+            int result_cols = screenshotMat.cols() - targetImage.cols() + 1;
+            int result_rows = screenshotMat.rows() - targetImage.rows() + 1;
+            result.create( result_rows, result_cols, CvType.CV_32FC1 );
+
             screenshotMat.create(new Size(screenshotMat.width(), screenshotMat.height()), CvType.CV_8UC3);
             targetImage.create(new Size(targetImage.width(), targetImage.height()), CvType.CV_8UC3);
 
-            Imgproc.matchTemplate(screenshotMat, targetImage, result, Imgproc.TM_CCOEFF);
+            Imgproc.matchTemplate(screenshotMat, targetImage, result, Imgproc.TM_SQDIFF);
+            Core.normalize(result, result, 0, 1, Core.NORM_MINMAX, -1, new Mat());
 
-            double threshold = 100;
-            Mat binaryResult = new Mat();
-            Core.compare(result, new Scalar(threshold), binaryResult, Core.CMP_GE);
+            // / Localizing the best match with minMaxLoc
+            Core.MinMaxLocResult mmr = Core.minMaxLoc(result);
 
-            ArrayList<MatOfPoint> contours = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(binaryResult, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            org.opencv.core.Point matchLoc = mmr.minLoc;
 
-            double maxArea = 0;
-            int maxAreaIndex = -1;
-
-            for (int i = 0; i < contours.size(); i++) {
-                double area = Imgproc.contourArea(contours.get(i));
-                if (area > maxArea) {
-                    maxArea = area;
-                    maxAreaIndex = i;
-                }
-            }
-
-            if (maxAreaIndex == -1) return null;
-
-            Rect rect = Imgproc.boundingRect(contours.get(maxAreaIndex));
-            Imgproc.rectangle(screenshotMat, rect, new Scalar(0, 0, 0));
-            Imgcodecs.imwrite("/private/var/folders/nk/b888bwnj5z365rf5k0gkk8x00000gn/T/test.png", screenshotMat);
+            Rect rect = new Rect((int) matchLoc.x, (int) matchLoc.y, targetImage.width(), targetImage.height());
 
             return new Point(rect.x + (rect.width / 2), rect.y + (rect.height / 2));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private Mat resizeMat(Mat image) {
+        Mat resizedImage = new Mat();
+        Size newSize = new Size((double) image.width() / 2, (double) image.height() / 2);
+        Imgproc.resize(image, resizedImage, newSize);
+        return resizedImage;
     }
 
     private Mat bufferedImageToMat(BufferedImage bufferedImage) {

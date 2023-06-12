@@ -28,6 +28,7 @@
                 <configuration>
                     <source>19</source>
                     <target>19</target>
+                    <useIncrementalCompilation>true</useIncrementalCompilation>
                 </configuration>
             </plugin>
         </plugins>

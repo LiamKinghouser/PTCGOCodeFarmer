@@ -34,8 +34,6 @@ public class OCRUtils {
 
             MultiFormatReader multiFormatReader = new MultiFormatReader();
 
-            System.out.println("Starting scan for " + totalFrames + " frames...");
-            long startTime = System.currentTimeMillis();
             for (int i = 1; i <= totalFrames; i++) {
                 Frame frame = grabber.grabImage();
                 BufferedImage bi = converter.convert(frame);
@@ -47,24 +45,16 @@ public class OCRUtils {
                     continue;
                 }
 
-                String result = decodeQRCode(bi, multiFormatReader, null, null, null);
+                String result = decodeQRCode(bi, multiFormatReader);
 
                 if (result != null && !result.isBlank() && !results.contains(result) && Utils.isPTCGOCode(result)) {
                     results.add(result);
                     PTCGOCodeFarmer.ptcgoCodeRedeemer.addCodeToQueue(result);
                     System.out.println(result);
                 }
-
-                // System.out.print("\r");
-                // System.out.print("[ " + (int)(((float)i / (float)totalFrames) * 100) + "% ] [ " + i + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(i, System.currentTimeMillis() - startTime) + " fps ] [ " + Utils.getTime((int) ((System.currentTimeMillis() - startTime) / 1000)) + " ]");
             }
-            grabber.stop();
-            // System.out.print("\r");
-            // System.out.print("[ 100% ] [ " + totalFrames + "/" + totalFrames + " ] [ " + Utils.findAverageSpeed(totalFrames, System.currentTimeMillis() - startTime) + " fps ]");
 
-            // System.out.println();
-            // System.out.println("Frames scanned. Time elapsed: " + Utils.getTime((int)(System.currentTimeMillis() - startTime) / 1000));
-            // System.out.println("Found " + results.size() + " QR Codes:");
+            grabber.stop();
             file.delete();
             PTCGOCodeFarmer.guiThread.resetImage(PTCGOCodeFarmer.youTubeCrawler.getIndex(threadID));
             return true;
@@ -74,11 +64,11 @@ public class OCRUtils {
         }
     }
 
-    private static String decodeQRCode(BufferedImage bufferedImage, MultiFormatReader multiFormatReader, LuminanceSource source, BinaryBitmap bitmap, Result result) {
-        source = new BufferedImageLuminanceSource(bufferedImage);
-        bitmap = new BinaryBitmap(new HybridBinarizer(source));
+    private static String decodeQRCode(BufferedImage bufferedImage, MultiFormatReader multiFormatReader) {
+        LuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         try {
-            result = multiFormatReader.decode(bitmap);
+            Result result = multiFormatReader.decode(bitmap);
             return result.getText();
         } catch (NotFoundException e) {
             return "";

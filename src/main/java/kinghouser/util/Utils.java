@@ -4,7 +4,6 @@ import com.github.kiulian.downloader.model.search.SearchResultVideoDetails;
 import kinghouser.PTCGOCodeFarmer;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -85,7 +84,7 @@ public class Utils {
             frame.add(mainPanel, BorderLayout.NORTH);
 
             // Load sample images
-            BufferedImage[] images = loadSampleImages();
+            BufferedImage[] images = loadPlaceholders();
 
             // Create and add image labels to the main panel
             for (BufferedImage image : images) {
@@ -97,12 +96,10 @@ public class Utils {
                 if (index != -1) threadSnapshots[index] = threadSnapshot;
             }
 
-            // Adjust frame size based on content
-
             frame.setVisible(true);
         }
 
-        private BufferedImage[] loadSampleImages() {
+        private BufferedImage[] loadPlaceholders() {
             BufferedImage[] images = new BufferedImage[Utils.MAX_THREADS];
 
             int width = 200;

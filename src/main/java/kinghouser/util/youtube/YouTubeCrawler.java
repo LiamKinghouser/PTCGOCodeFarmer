@@ -105,7 +105,7 @@ public class YouTubeCrawler {
 
     public synchronized void removeFromRunningYouTubeVideoScanners(long threadID) {
         for (int i = 0; i < Utils.MAX_THREADS; i++) {
-            if (runningYouTubeVideoScanners[i].equals(threadID)) runningYouTubeVideoScanners[i] = null;
+            if (runningYouTubeVideoScanners[i] != null && runningYouTubeVideoScanners[i].equals(threadID)) runningYouTubeVideoScanners[i] = null;
         }
     }
 
@@ -128,7 +128,7 @@ public class YouTubeCrawler {
 
     public synchronized int getIndex(long threadID) {
         for (int i = 0; i < Utils.MAX_THREADS; i++) {
-            if (runningYouTubeVideoScanners[i].equals(threadID)) return i;
+            if (runningYouTubeVideoScanners[i] != null && runningYouTubeVideoScanners[i].equals(threadID)) return i;
         }
         return -1;
     }
